@@ -72,8 +72,8 @@
   --success: 142 71% 45%;
   --success-foreground: 142 71% 10%;
   
-  --warning: 38 92% 50%;
-  --warning-foreground: 38 92% 10%;
+  --warning: 45 100% 55%;
+  --warning-foreground: 45 100% 10%;
 
   --destructive: 348 100% 60%;
   --destructive-foreground: 348 100% 10%;
@@ -152,12 +152,36 @@
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(hsl(var(--primary) / 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--primary) / 0.04) 1px, transparent 1px);
+      linear-gradient(hsl(var(--primary) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--primary) / 0.06) 1px, transparent 1px);
     background-size: 60px 60px;
     mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
   }
+
+  .badge-glow-green { box-shadow: 0 0 10px hsl(142 71% 45% / 0.55), 0 0 20px hsl(142 71% 45% / 0.25); }
+  .badge-glow-red { box-shadow: 0 0 10px hsl(348 100% 60% / 0.55), 0 0 20px hsl(348 100% 60% / 0.25); }
+  .badge-glow-amber { box-shadow: 0 0 10px hsl(45 100% 55% / 0.55), 0 0 20px hsl(45 100% 55% / 0.25); }
+  .badge-glow-cyan { box-shadow: 0 0 10px hsl(180 100% 50% / 0.5), 0 0 20px hsl(180 100% 50% / 0.2); }
+  
+  .cursor-blink::after { content: "▌"; animation: blink 1s step-end infinite; }
+
+  .scanlines {
+    position: fixed; 
+    inset: 0; 
+    pointer-events: none; 
+    z-index: 1;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+    animation: scanline-scroll 8s linear infinite;
+  }
+
+  .left-bar-bullish { border-left: 2px solid hsl(var(--success)); }
+  .left-bar-bearish { border-left: 2px solid hsl(var(--destructive)); }
+  .left-bar-neutral { border-left: 2px solid hsl(var(--warning)); }
 }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+@keyframes scanline-scroll { from { background-position: 0 0; } to { background-position: 0 100px; } }
 
 @keyframes orb-drift {
   0%   { transform: translate(0, 0) scale(1); }

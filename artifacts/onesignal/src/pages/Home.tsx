@@ -13,6 +13,12 @@ const MOMENTUM_COLOR: Record<string, string> = {
   Neutral: "text-amber-400 border-amber-400/30 bg-amber-400/10",
 };
 
+const LEFT_BAR_COLOR: Record<string, string> = {
+  Bullish: "left-bar-bullish",
+  Bearish: "left-bar-bearish",
+  Neutral: "left-bar-neutral",
+};
+
 const RISK_COLOR: Record<string, string> = {
   Low: "text-emerald-400",
   Medium: "text-amber-400",
@@ -25,7 +31,7 @@ function RecentSignalItem({ signal, index }: { signal: SignalResult; index: numb
       initial={{ opacity: 0, x: -12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.07 }}
-      className="glass-panel rounded-xl px-5 py-4 flex items-center justify-between gap-4 group hover:border-white/10 transition-colors"
+      className={`glass-panel rounded-xl px-5 py-4 flex items-center justify-between gap-4 group hover:border-white/10 transition-colors ${LEFT_BAR_COLOR[signal.momentum] || ''}`}
     >
       <div className="flex items-center gap-4 min-w-0">
         <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
@@ -95,13 +101,21 @@ export default function Home() {
 
   return (
     <div className="min-h-screen w-full relative flex flex-col">
+      {/* Live Indicator */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md shadow-lg shadow-black/50">
+        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="text-xs font-mono font-bold tracking-wider text-emerald-400/90">
+          LIVE · ONECHAIN
+        </span>
+      </div>
 
       {/* Animated background orbs */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-background">
         <div className="orb orb-1" />
         <div className="orb orb-2" />
         <div className="orb orb-3" />
         <div className="grid-overlay" />
+        <div className="scanlines" />
       </div>
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12 md:py-24 relative z-10 flex flex-col">
@@ -112,17 +126,17 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-primary/10 border border-primary/20 mb-6">
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-primary/10 border border-primary/20 mb-6 shadow-lg shadow-primary/10">
             <Signal className="w-8 h-8 text-primary text-glow" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4 tracking-tighter">
-            <motion.span animate={oneControls} className="inline-block">
-              One
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4 tracking-[-0.05em] uppercase font-sans">
+            <motion.span animate={oneControls} className="inline-block text-white">
+              ONE
             </motion.span>
-            <span className="text-primary text-glow">Signal</span>
+            <span className="text-primary text-glow">SIGNAL</span>
           </h1>
-          <p className="text-muted-foreground text-lg md:text-xl font-mono max-w-2xl mx-auto">
-            AI-powered trading intelligence for the OneChain network.
+          <p className="text-primary/70 text-sm md:text-base font-mono max-w-2xl mx-auto uppercase tracking-widest">
+            // AI TRADING INTELLIGENCE · ONECHAIN NETWORK
           </p>
         </motion.div>
 
@@ -135,7 +149,7 @@ export default function Home() {
         >
           <form onSubmit={handleAnalyze} className="relative group">
             <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl transition-all duration-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100" />
-            <div className="relative flex items-center bg-card border-2 border-border rounded-2xl overflow-hidden transition-colors focus-within:border-primary focus-within:glow-cyan">
+            <div className="relative flex items-center bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden transition-colors focus-within:border-primary focus-within:glow-cyan shadow-2xl shadow-black/50">
               <div className="pl-6 pr-2">
                 <Search className="w-6 h-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
               </div>
@@ -151,15 +165,15 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={!query.trim() || analyzeMutation.isPending}
-                  className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-lg shadow-primary/25"
+                  className="px-6 py-3 bg-primary/20 border border-primary/50 text-primary font-mono font-bold uppercase tracking-wider rounded-xl hover:bg-primary hover:text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-[0_0_15px_rgba(0,255,255,0.3)] hover:shadow-[0_0_25px_rgba(0,255,255,0.6)]"
                 >
-                  Analyze
+                  ANALYZE &gt;
                 </button>
               </div>
             </div>
           </form>
-          <p className="mt-2.5 pl-1 text-xs font-mono text-muted-foreground/50 tracking-wide">
-            Name: 2–30 characters &nbsp;·&nbsp; Or paste a contract address
+          <p className="mt-4 pl-1 text-xs font-mono text-muted-foreground/40 tracking-widest uppercase">
+            // Name: 2–30 characters · Or paste a contract address
           </p>
         </motion.div>
 
