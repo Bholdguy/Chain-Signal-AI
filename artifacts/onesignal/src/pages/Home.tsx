@@ -5,6 +5,7 @@ import { useAnalyzeToken } from "@workspace/api-client-react";
 import { SignalResult } from "@workspace/api-client-react/src/generated/api.schemas";
 import { TerminalLoader } from "@/components/TerminalLoader";
 import { SignalCard } from "@/components/SignalCard";
+import { WalletButton } from "@/components/WalletButton";
 import { format } from "date-fns";
 
 const MOMENTUM_COLOR: Record<string, string> = {
@@ -101,12 +102,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen w-full relative flex flex-col">
-      {/* Live Indicator */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md shadow-lg shadow-black/50">
-        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-        <span className="text-xs font-mono font-bold tracking-wider text-emerald-400/90">
-          LIVE · ONECHAIN
-        </span>
+      {/* Top-right header cluster */}
+      <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2">
+        <WalletButton />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md shadow-lg shadow-black/50">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-xs font-mono font-bold tracking-wider text-emerald-400/90">
+            LIVE · ONECHAIN
+          </span>
+        </div>
       </div>
 
       {/* Animated background orbs */}
