@@ -1,35 +1,95 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, AlertCircle, Signal } from "lucide-react";
+import { Search, AlertCircle, Signal, Clock, ChevronRight, History } from "lucide-react";
 import { useAnalyzeToken } from "@workspace/api-client-react";
+import { SignalResult } from "@workspace/api-client-react/src/generated/api.schemas";
 import { TerminalLoader } from "@/components/TerminalLoader";
 import { SignalCard } from "@/components/SignalCard";
+import { format } from "date-fns";
+
+const MOMENTUM_COLOR: Record<string, string> = {
+  Bullish: "text-emerald-400 border-emerald-400/30 bg-emerald-400/10",
+  Bearish: "text-rose-400 border-rose-400/30 bg-rose-400/10",
+  Neutral: "text-amber-400 border-amber-400/30 bg-amber-400/10",
+};
+
+const RISK_COLOR: Record<string, string> = {
+  Low: "text-emerald-400",
+  Medium: "text-amber-400",
+  High: "text-rose-400",
+};
+
+function RecentSignalItem({ signal, index }: { signal: SignalResult; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.07 }}
+      className="glass-panel rounded-xl px-5 py-4 flex items-center justify-between gap-4 group hover:border-white/10 transition-colors"
+    >
+      <div className="flex items-center gap-4 min-w-0">
+        <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+          <Signal className="w-4 h-4 text-primary" />
+        </div>
+        <div className="min-w-0">
+          <p className="font-semibold text-foreground truncate">{signal.tokenQuery}</p>
+          <p className="text-xs font-mono text-muted-foreground flex items-center gap-1 mt-0.5">
+            <Clock className="w-3 h-3" />
+            {format(new Date(signal.analyzedAt), "HH:mm:ss · MMM d")}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full border ${MOMENTUM_COLOR[signal.momentum] ?? "text-muted-foreground border-border"}`}>
+          {signal.momentum}
+        </span>
+        <span className={`text-xs font-mono hidden sm:inline ${RISK_COLOR[signal.riskLevel] ?? "text-muted-foreground"}`}>
+          {signal.riskLevel} risk
+        </span>
+        <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+      </div>
+    </motion.div>
+  );
+}
 
 export default function Home() {
   const [query, setQuery] = useState("");
+  const [recentSignals, setRecentSignals] = useState<SignalResult[]>([]);
   const analyzeMutation = useAnalyzeToken();
+
+  useEffect(() => {
+    if (analyzeMutation.isSuccess && analyzeMutation.data) {
+      setRecentSignals((prev) => {
+        const filtered = prev.filter(
+          (s) => s.tokenQuery !== analyzeMutation.data!.tokenQuery
+        );
+        return [analyzeMutation.data!, ...filtered].slice(0, 3);
+      });
+    }
+  }, [analyzeMutation.isSuccess, analyzeMutation.data]);
 
   const handleAnalyze = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    
-    analyzeMutation.mutate({ 
-      data: { query: query.trim() } 
-    });
+    analyzeMutation.mutate({ data: { query: query.trim() } });
   };
 
   return (
     <div className="min-h-screen w-full relative flex flex-col">
-      {/* Background Image Overlay */}
-      <div 
-        className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-cover bg-center bg-no-repeat mix-blend-screen"
-        style={{ backgroundImage: `url('${import.meta.env.BASE_URL}images/hero-bg.png')` }}
-      />
-      
+
+      {/* Animated background orbs */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+        <div className="grid-overlay" />
+      </div>
+
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12 md:py-24 relative z-10 flex flex-col">
-        
-        {/* Header Section */}
-        <motion.div 
+
+        {/* Header */}
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
@@ -45,8 +105,8 @@ export default function Home() {
           </p>
         </motion.div>
 
-        {/* Search Input Section */}
-        <motion.div 
+        {/* Search */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -70,7 +130,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={!query.trim() || analyzeMutation.isPending}
-                  className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center shadow-lg shadow-primary/25"
+                  className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-lg shadow-primary/25"
                 >
                   Analyze
                 </button>
@@ -79,17 +139,17 @@ export default function Home() {
           </form>
         </motion.div>
 
-        {/* Results / State Section */}
-        <div className="w-full flex-1">
+        {/* Results */}
+        <div className="w-full">
           <AnimatePresence mode="wait">
             {analyzeMutation.isPending && (
-              <motion.div key="loader" className="w-full">
+              <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
                 <TerminalLoader />
               </motion.div>
             )}
 
             {analyzeMutation.isError && !analyzeMutation.isPending && (
-              <motion.div 
+              <motion.div
                 key="error"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -101,9 +161,11 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-2">Analysis Failed</h3>
                 <p className="text-muted-foreground max-w-md font-mono text-sm">
-                  {analyzeMutation.error?.error || analyzeMutation.error?.message || "Unable to retrieve intelligence from OneChain RPC. Please verify the contract address and try again."}
+                  {(analyzeMutation.error as { error?: string; message?: string })?.error ||
+                    (analyzeMutation.error as { message?: string })?.message ||
+                    "Unable to retrieve intelligence from OneChain RPC. Please verify the contract address and try again."}
                 </p>
-                <button 
+                <button
                   onClick={() => analyzeMutation.reset()}
                   className="mt-6 px-4 py-2 border border-border rounded-lg text-sm hover:bg-white/5 transition-colors font-mono"
                 >
@@ -113,14 +175,13 @@ export default function Home() {
             )}
 
             {analyzeMutation.isSuccess && analyzeMutation.data && !analyzeMutation.isPending && (
-              <motion.div key="result" className="w-full">
+              <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
                 <SignalCard data={analyzeMutation.data} />
               </motion.div>
             )}
-            
-            {/* Empty State placeholder if nothing has happened yet */}
+
             {analyzeMutation.isIdle && (
-              <motion.div 
+              <motion.div
                 key="empty"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -134,13 +195,63 @@ export default function Home() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Recent Signals */}
+        <AnimatePresence>
+          {recentSignals.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              className="w-full mt-12"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <History className="w-4 h-4 text-muted-foreground" />
+                <h2 className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
+                  Recent Signals
+                </h2>
+                <div className="flex-1 h-px bg-border ml-2" />
+              </div>
+              <div className="flex flex-col gap-3">
+                {recentSignals.map((signal, i) => (
+                  <RecentSignalItem key={`${signal.tokenQuery}-${signal.analyzedAt}`} signal={signal} index={i} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
-      
+
       {/* Footer */}
-      <footer className="py-6 text-center z-10">
-        <p className="text-xs text-muted-foreground font-mono">
-          Data sourced directly from OneChain Mainnet RPC
-        </p>
+      <footer className="relative z-10 py-8 mt-8 border-t border-white/5">
+        <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* OneChain branding */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5">
+              <svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="15" stroke="hsl(180,100%,50%)" strokeWidth="2" />
+                <path d="M10 16 L16 10 L22 16 L16 22 Z" fill="hsl(180,100%,50%)" fillOpacity="0.8" />
+                <circle cx="16" cy="16" r="3" fill="hsl(180,100%,50%)" />
+              </svg>
+              <span className="text-xs font-mono font-semibold text-primary">OneChain</span>
+            </div>
+            <span className="text-xs text-muted-foreground font-mono">Mainnet</span>
+          </div>
+
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground/60 font-mono">
+              Powered by{" "}
+              <span className="text-primary/70">OneChain RPC</span>
+              {" · "}
+              <span className="text-primary/70">Groq LLaMA 3</span>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-mono text-muted-foreground">Live</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
