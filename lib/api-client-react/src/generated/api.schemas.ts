@@ -8,3 +8,50 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface AnalyzeRequest {
+  /** Token name or contract address to analyze */
+  query: string;
+}
+
+export type SignalResultMomentum =
+  (typeof SignalResultMomentum)[keyof typeof SignalResultMomentum];
+
+export const SignalResultMomentum = {
+  Bullish: "Bullish",
+  Neutral: "Neutral",
+  Bearish: "Bearish",
+} as const;
+
+export type SignalResultWhaleActivity =
+  (typeof SignalResultWhaleActivity)[keyof typeof SignalResultWhaleActivity];
+
+export const SignalResultWhaleActivity = {
+  High: "High",
+  Medium: "Medium",
+  Low: "Low",
+} as const;
+
+export type SignalResultRiskLevel =
+  (typeof SignalResultRiskLevel)[keyof typeof SignalResultRiskLevel];
+
+export const SignalResultRiskLevel = {
+  High: "High",
+  Medium: "Medium",
+  Low: "Low",
+} as const;
+
+export interface SignalResult {
+  momentum: SignalResultMomentum;
+  whaleActivity: SignalResultWhaleActivity;
+  riskLevel: SignalResultRiskLevel;
+  /** 3-sentence plain-English market narrative */
+  narrative: string;
+  /** The token name or contract address that was analyzed */
+  tokenQuery: string;
+  analyzedAt: string;
+}
+
+export interface ErrorResponse {
+  error: string;
+}

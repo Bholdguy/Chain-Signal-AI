@@ -1,0 +1,13 @@
+packages:
+  "framer-motion": "For fluid, futuristic animations and reveal effects"
+  "date-fns": "For formatting timestamps in the terminal view"
+  "clsx": "Utility for conditionally joining classNames"
+  "tailwind-merge": "Utility to merge tailwind classes"
+
+images:
+  - path: "artifacts/onesignal/public/images/hero-bg.png"
+    description: "Dark futuristic abstract background with subtle glowing data nodes and deep cyan and dark blue gradients, very minimal, moody and high-tech"
+    aspect_ratio: "16:9"
+
+notes:
+  - Importing React Query hooks directly from @workspace/api-client-react as specified.

@@ -6,4 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./analyzeRequest";
+export * from "./errorResponse";
 export * from "./healthStatus";
+export * from "./signalResult";
+export * from "./signalResultMomentum";
+export * from "./signalResultRiskLevel";
+export * from "./signalResultWhaleActivity";

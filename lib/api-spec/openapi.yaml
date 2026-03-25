@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,6 +9,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: signal
+    description: Trading signal analysis
 paths:
   /healthz:
     get:
@@ -24,6 +25,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /analyze:
+    post:
+      operationId: analyzeToken
+      tags: [signal]
+      summary: Analyze token trading signal
+      description: Fetches on-chain data and returns an AI-generated trading signal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeRequest"
+      responses:
+        "200":
+          description: Trading signal result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignalResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +65,46 @@ components:
           type: string
       required:
         - status
-
+    AnalyzeRequest:
+      type: object
+      properties:
+        query:
+          type: string
+          description: Token name or contract address to analyze
+      required:
+        - query
+    SignalResult:
+      type: object
+      properties:
+        momentum:
+          type: string
+          enum: [Bullish, Neutral, Bearish]
+        whaleActivity:
+          type: string
+          enum: [High, Medium, Low]
+        riskLevel:
+          type: string
+          enum: [High, Medium, Low]
+        narrative:
+          type: string
+          description: 3-sentence plain-English market narrative
+        tokenQuery:
+          type: string
+          description: The token name or contract address that was analyzed
+        analyzedAt:
+          type: string
+          format: date-time
+      required:
+        - momentum
+        - whaleActivity
+        - riskLevel
+        - narrative
+        - tokenQuery
+        - analyzedAt
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

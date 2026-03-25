@@ -16,6 +16,24 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
+## Artifacts
+
+### `artifacts/onesignal` (`@workspace/onesignal`)
+
+React + Vite frontend for the OneSignal trading intelligence dashboard. Dark terminal aesthetic UI.
+
+- Input: token name or contract address
+- Calls `POST /api/analyze` on the API server
+- Displays signal card: Momentum, Whale Activity, Risk Level, Narrative
+
+### `artifacts/api-server` — Analyze Route
+
+`src/routes/analyze.ts` — POST /api/analyze:
+- Fetches live block data from OneChain mainnet RPC (`https://rpc-mainnet.onelabs.cc:443`)
+- Sends on-chain context to Groq (`llama-3.3-70b-versatile`) for AI signal generation
+- Returns: `{ momentum, whaleActivity, riskLevel, narrative, tokenQuery, analyzedAt }`
+- Requires `GROQ_API_KEY` environment secret
+
 ## Structure
 
 ```text

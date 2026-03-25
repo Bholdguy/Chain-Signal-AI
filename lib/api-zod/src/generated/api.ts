@@ -14,3 +14,22 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Fetches on-chain data and returns an AI-generated trading signal
+ * @summary Analyze token trading signal
+ */
+export const AnalyzeTokenBody = zod.object({
+  query: zod.string().describe("Token name or contract address to analyze"),
+});
+
+export const AnalyzeTokenResponse = zod.object({
+  momentum: zod.enum(["Bullish", "Neutral", "Bearish"]),
+  whaleActivity: zod.enum(["High", "Medium", "Low"]),
+  riskLevel: zod.enum(["High", "Medium", "Low"]),
+  narrative: zod.string().describe("3-sentence plain-English market narrative"),
+  tokenQuery: zod
+    .string()
+    .describe("The token name or contract address that was analyzed"),
+  analyzedAt: zod.date(),
+});
