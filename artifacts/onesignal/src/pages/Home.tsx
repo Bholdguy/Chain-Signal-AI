@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Search, AlertCircle, Signal, Clock, ChevronRight, History } from "lucide-react";
 import { useAnalyzeToken } from "@workspace/api-client-react";
 import { SignalResult } from "@workspace/api-client-react/src/generated/api.schemas";
@@ -57,6 +57,24 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [recentSignals, setRecentSignals] = useState<SignalResult[]>([]);
   const analyzeMutation = useAnalyzeToken();
+  const oneControls = useAnimation();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const pulse = async () => {
+      await oneControls.start({
+        x: [0, -3, 3, -2, 2, 0],
+        y: [0, -2, 1, -1, 2, 0],
+        transition: { duration: 1.2, ease: "easeInOut" },
+      });
+      oneControls.set({ x: 0, y: 0 });
+    };
+
+    intervalRef.current = setInterval(pulse, 5000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [oneControls]);
 
   useEffect(() => {
     if (analyzeMutation.isSuccess && analyzeMutation.data) {
@@ -98,7 +116,10 @@ export default function Home() {
             <Signal className="w-8 h-8 text-primary text-glow" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4 tracking-tighter">
-            One<span className="text-primary text-glow">Signal</span>
+            <motion.span animate={oneControls} className="inline-block">
+              One
+            </motion.span>
+            <span className="text-primary text-glow">Signal</span>
           </h1>
           <p className="text-muted-foreground text-lg md:text-xl font-mono max-w-2xl mx-auto">
             AI-powered trading intelligence for the OneChain network.
@@ -137,6 +158,9 @@ export default function Home() {
               </div>
             </div>
           </form>
+          <p className="mt-2.5 pl-1 text-xs font-mono text-muted-foreground/50 tracking-wide">
+            Name: 2–30 characters &nbsp;·&nbsp; Or paste a contract address
+          </p>
         </motion.div>
 
         {/* Results */}
