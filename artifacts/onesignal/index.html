@@ -5,6 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>OneSignal</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Suppress wallet extension conflicts before any other script can register handlers -->
+    <script>
+      (function () {
+        // Patch Object.defineProperty to silently ignore duplicate wallet property definitions
+        var _defineProperty = Object.defineProperty;
+        var GUARDED = ['ethereum', 'isZerion', 'isMetaMask', 'web3'];
+        Object.defineProperty = function (target, prop, descriptor) {
+          if (target === window && GUARDED.indexOf(String(prop)) !== -1) {
+            try { return _defineProperty(target, prop, descriptor); } catch (_) { return target; }
+          }
+          return _defineProperty(target, prop, descriptor);
+        };
+
+        // Register early-capture error suppressors before Vite's runtime-error plugin loads
+        var NOISE_PATTERNS = [
+          'Cannot redefine property: ethereum',
+          'Cannot redefine property: isZerion',
+          'Cannot redefine property: isMetaMask',
+          'Failed to connect to MetaMask',
+          'MetaMask: Disconnected from chain',
+          'chrome-extension://',
+        ];
+        function isNoise(msg) {
+          if (!msg) return false;
+          var s = String(msg);
+          for (var i = 0; i < NOISE_PATTERNS.length; i++) {
+            if (s.indexOf(NOISE_PATTERNS[i]) !== -1) return true;
+          }
+          return false;
+        }
+        window.addEventListener('error', function (e) {
+          if (isNoise(e.message)) { e.preventDefault(); e.stopImmediatePropagation(); }
+        }, true);
+        window.addEventListener('unhandledrejection', function (e) {
+          var msg = (e.reason && e.reason.message) ? e.reason.message : String(e.reason || '');
+          if (isNoise(msg)) { e.preventDefault(); e.stopImmediatePropagation(); }
+        }, true);
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
