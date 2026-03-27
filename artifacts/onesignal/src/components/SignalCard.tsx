@@ -92,6 +92,19 @@ export function SignalCard({ data }: { data: SignalResult }) {
         </p>
       </div>
 
+      {/* Trade CTA */}
+      <div className="px-6 pb-6 bg-black/40">
+        <a
+          href="https://dex.onelabs.cc"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-primary/40 bg-primary/5 text-primary font-mono font-bold text-sm uppercase tracking-widest transition-all duration-200 hover:bg-primary/15 hover:border-primary/80 hover:shadow-[0_0_20px_rgba(0,255,255,0.25)] active:scale-[0.98]"
+        >
+          Trade on OneDEX
+          <span className="text-primary/70">→</span>
+        </a>
+      </div>
+
       {/* Footer */}
       <div className="px-6 py-3 border-t border-white/5 bg-black/60 text-center">
         <span className="text-[10px] font-mono text-muted-foreground/40 tracking-widest">
